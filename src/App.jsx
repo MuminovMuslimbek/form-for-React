@@ -9,7 +9,7 @@ import github from './assets/github.svg'
 const App = () => {
   const [url, setUrl] = useState(null)
   const [fData, setFData] = useState(null)
-  const[users,setUsers]=useState([])
+  const [users, setUsers] = useState([])
   return (
     <>
       <Header />
@@ -28,6 +28,10 @@ const App = () => {
           setFData((prev) => {
             return { ...prev, result }
           })
+          result.url = fData.url
+          setUsers((prev) => [...prev, { ...prev, ...result }])
+          e.target.reset()
+          setUrl(null)
         }}
           className='flex flex-col w-full gap-5'>
           <div className='flex items-center gap-5'>
@@ -45,7 +49,7 @@ const App = () => {
                   return { ...prev, url }
                 })
               }}
-                className='hidden' type="file" name='url' />
+                className='hidden' type="file" name='urlImg' />
             </label>
           </div>
           <label className="form-control w-full">
@@ -53,7 +57,7 @@ const App = () => {
               <span className="label-text text-[#2A2941]">Kompaniya nomi:</span>
             </div>
             <input
-              name='kompanyName'
+              name='companyName'
               type="text"
               placeholder="Kompaniya nomi"
               className="input input-bordered w-full bg-white" />
@@ -83,16 +87,21 @@ const App = () => {
               <span className="label-text text-[#2A2941]">Linklar:</span>
             </div>
             <div className='flex gap-2 items-center'>
-              <div className='p-[19.5px] border border-[#E3E3E3] max-w-14 rounded-[12px] cursor-pointer select-none active:scale-[0.7] duration-300'>
-                <img src={earth} /></div>
-              <div className='p-[19.5px] border border-[#E3E3E3] max-w-14 rounded-[12px] cursor-pointer select-none active:scale-[0.7] duration-300'>
-                <img src={instagram} /></div>
-              <div className='p-[19.5px] border border-[#E3E3E3] max-w-14 rounded-[12px] cursor-pointer select-none active:scale-[0.7] duration-300'>
-                <img src={telegram} /></div>
-              <div className='p-[19.5px] border border-[#E3E3E3] max-w-14 rounded-[12px] cursor-pointer select-none active:scale-[0.7] duration-300'>
-                <img src={facebook} /></div>
-              <div className='p-[19.5px] border border-[#E3E3E3] max-w-14 rounded-[12px] cursor-pointer select-none active:scale-[0.7] duration-300'>
-                <img src={github} /></div>
+              <div onClick={() => { const modal = document.getElementById('myDialog'); modal.showModal() }} className='p-[19.5px] border border-[#E3E3E3] max-w-14 rounded-[12px] cursor-pointer select-none active:scale-[0.7] duration-300'>
+                <img src={earth} />
+              </div>
+              <div onClick={() => { const modal = document.getElementById('myDialog'); modal.showModal() }} className='p-[19.5px] border border-[#E3E3E3] max-w-14 rounded-[12px] cursor-pointer select-none active:scale-[0.7] duration-300'>
+                <img src={instagram} />
+              </div>
+              <div onClick={() => { const modal = document.getElementById('myDialog'); modal.showModal() }} className='p-[19.5px] border border-[#E3E3E3] max-w-14 rounded-[12px] cursor-pointer select-none active:scale-[0.7] duration-300'>
+                <img src={telegram} />
+              </div>
+              <div onClick={() => { const modal = document.getElementById('myDialog'); modal.showModal() }} className='p-[19.5px] border border-[#E3E3E3] max-w-14 rounded-[12px] cursor-pointer select-none active:scale-[0.7] duration-300'>
+                <img src={facebook} />
+              </div>
+              <div onClick={() => { const modal = document.getElementById('myDialog'); modal.showModal() }} className='p-[19.5px] border border-[#E3E3E3] max-w-14 rounded-[12px] cursor-pointer select-none active:scale-[0.7] duration-300'>
+                <img src={github} />
+              </div>
             </div>
           </label>
           <div className='flex items-center gap-4'>
@@ -147,9 +156,44 @@ const App = () => {
               placeholder="Kompaniya haqida izoh qoldiring"
               className="input input-bordered w-full bg-white py-2" />
           </label>
-          <button className='btn w-full max-w-56 mx-auto bg-[#5361E4] text-[#fff]' type='submit'>Submit</button>
+          <button className='btn w-full bg-[#43434a] text-[#fff]' type='submit'>Submit</button>
         </form>
       </div>
+      {users.length == 0 && (
+        <p className='text-center py-5'>Ma'lumot mavjud emas!!</p>
+      )}
+
+      <div className='flex flex-wrap  gap-6 max-w-[1200px] mx-auto'>
+        {users.length > 0 &&
+          users.map(({ companyName, email, url }, index) => {
+            return (
+              <div key={index} className="card bg-base-100 w-96 shadow-xl">
+                <div className="card-body">
+                  <h2 className="card-title">Shoes!</h2>
+                  <p>{companyName}</p>
+                  <mark>{email}</mark>
+                </div>
+                <figure>
+                  <img
+                    src={url}
+                    alt="Shoes" />
+                </figure>
+              </div>
+            )
+          })}
+      </div>
+
+      <dialog id="myDialog" className="modal">
+        <div className="modal-box bg-white">
+          <form method="dialog">
+            <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 text-black">✕</button>
+          </form>
+          <h3 className="font-bold text-lg text-black opacity-80">Enter your url..</h3>
+          <div>
+            <input name='UrlLinks' type="url" placeholder="Type here" className="input w-full bg-white my-4" />
+          </div>
+        </div>
+      </dialog>
     </>
   )
 }
