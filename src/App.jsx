@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import CircleImg from './assets/userImg.png';
 import Header from './component/header';
 import earth from './assets/earth.svg';
@@ -12,13 +12,13 @@ const App = () => {
   const [fData, setFData] = useState({});
   const [users, setUsers] = useState([]);
 
+  useEffect(() => {
+    setUsers(JSON.parse(localStorage.getItem('card') || '[]'));
+  }, []);
+
   function validate(form) {
     if (form.companyName.length <= 3) {
       alert("Iltimos, kompaniya nomini to'liq kiriting!");
-      return false;
-    }
-    if (form.email.length <= 7) {
-      alert("Iltimos, emailni to'liq kiriting!");
       return false;
     }
     if (form.email.length <= 7) {
@@ -29,7 +29,7 @@ const App = () => {
       alert("Iltimos telefon raqamini kiriting!");
       return false;
     }
-    if (form.country.length <= 5) {
+    if (form.country.length <= 3) {
       alert("Iltimos, davlatingizni nomini to'liq kiriting!");
       return false;
     }
@@ -41,12 +41,17 @@ const App = () => {
       alert("Iltimos, manzilingizni to'liq kiriting!");
       return false;
     }
-    if (form.countUser.length <= 5) {
-      alert("Iltimos, hodimlar sonini to'liq kiriting!");
+    if (form.countUser.length <= 0) {
+      alert("Iltimos, hodimlar sonini kiriting!");
       return false;
     }
     return true;
   }
+
+  function setToLocalStorage(data) {
+    localStorage.setItem('card', JSON.stringify(data));
+  }
+
   return (
     <>
       <Header />
@@ -66,7 +71,9 @@ const App = () => {
             }
 
             const result = { ...formObj, url };
-            setUsers((prev) => [...prev, result]);
+            const updatedUsers = [...users, result];
+            setUsers(updatedUsers);
+            setToLocalStorage(updatedUsers);
             setFData({});
             setUrl(null);
             e.target.reset();
@@ -115,15 +122,15 @@ const App = () => {
               <span className="label-text text-[#2A2941]">Linklar <span className='text-red-400 text-[18px]'>*</span></span>
             </div>
             <div className="flex gap-2 items-center">
-              {[earth, instagram, telegram, facebook, github].map((icon, idx) => (
+              {[earth, instagram, telegram, facebook, github].map((icon, index) => (
                 <div
-                  key={idx}
+                  key={index}
                   onClick={() => {
                     const modal = document.getElementById('myDialog');
                     if (modal?.showModal) {
                       modal.showModal();
                     } else {
-                      alert("Dialog funksiyasi qo'llab-quvvatlanmaydi!");
+                      alert("Bular vaqtinchalik ishlamaydi!!");
                     }
                   }}
                   className="p-[19.5px] border border-[#E3E3E3] max-w-14 rounded-[12px] cursor-pointer select-none active:scale-[0.7] duration-300"
@@ -157,7 +164,7 @@ const App = () => {
             <div className="label">
               <span className="label-text text-[#2A2941]">Hodimlar soni <span className='text-red-400 text-[18px]'>*</span></span>
             </div>
-            <input name="countUser" type="text" placeholder="Hodimlar soni" className="input input-bordered w-full bg-white" />
+            <input name="countUser" type="number" placeholder="Hodimlar soni" className="input input-bordered w-full bg-white" />
           </label>
           <label className="form-control w-full">
             <div className="label">
@@ -176,42 +183,51 @@ const App = () => {
       </div>
       {users.length === 0 && <p className="text-center py-5">Ma'lumot mavjud emas!!</p>}
 
-      <div className="flex flex-wrap gap-6 max-w-[1200px] mx-auto ">
-        {users.map(({ companyName, email, url, phone }, index) => (
-          <div key={index} className="card w-96 shadow-lg bg-[#f0f0f0] text-blue-950">
-            <div className="card-body">
-              <img className='w-[84px] h-[84px] rounded-full'
-                src={
-                  url ? url : CircleImg
-                }
+      <div className="flex flex-wrap gap-6 max-w-[1200px] mx-auto" id='wrapper'>
+        {users.map((user, index) => (
+          <div
+            key={index}
+            className="card w-96 shadow-lg bg-[#f0f0f0] text-blue-950">
+            <div className="card-body items-center">
+              <img
+                className="w-[84px] h-[84px] rounded-full"
+                src={user.url || CircleImg}
+                alt="User"
               />
-              <h2 className="card-title">Kompaniya nomi: {companyName}</h2>
-              <a href='#'>Email: <span className='underline text-blue-600'>{email}</span></a>
-              <p>Tel: {phone}</p>
-              <p>Davlat: {countUser}</p>
-              <p>Shahar: {city}</p>
-              <p>Yashash joyi: {locetion}</p>
-              <p>Hodimlar soni: {countUser}</p>
-              <p>Izoh: {form.description}</p>
+              <h2 className="card-title">Kompaniya nomi: {user.companyName}</h2>
+              <a
+                href='#'
+              >
+                Email: <span className='underline text-blue-600'>{user.email}</span>
+              </a>
+              <p>Tel: {user.phone}</p>
+              <p>Davlat: {user.country || "Ma'lumot yo'q"}</p>
+              <p>Shahar: {user.city || "Ma'lumot yo'q"}</p>
+              <p>Yashash joyi: {user.locetion || "Ma'lumot yo'q"}</p>
+              <p>Hodimlar soni: {user.countUser || "Ma'lumot yo'q"}</p>
+              <p>Izoh: {user.description || "Izoh yo'q"}</p>
             </div>
           </div>
         ))}
       </div>
+      <button
+        onClick={() => {
+          const wrapper = document.getElementById('wrapper');
+          if (wrapper.innerHTML !== '') {
+            const isTrue = confirm('Rastanham siz barcha kardlarni o\'chirmoqchimisiz??')
+            if (isTrue) {
+              localStorage.removeItem('card');
+              if (wrapper) {
+                wrapper.innerHTML = '';
+              }
+            }
+          }
+        }}
+        className="btn flex mx-auto mt-[90px]"
+      >
+        Delete all cards
+      </button >
 
-      <dialog id="myDialog" className="modal">
-        <div className="modal-box bg-white">
-          <form method="dialog">
-            <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 text-black">✕</button>
-          </form>
-          <h3 className="font-bold text-lg text-black opacity-80">Enter your url..</h3>
-          <form className='flex flex-col items-end' onSubmit={(el) => {
-            el.preventDefault()
-          }}>
-            <input name="UrlLinks" type="url" placeholder="Type here" className="input w-full bg-white my-4" />
-            <button className='btn'>Submit</button>
-          </form>
-        </div>
-      </dialog>
     </>
   );
 };
